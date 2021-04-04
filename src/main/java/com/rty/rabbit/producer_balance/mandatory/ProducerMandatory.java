@@ -1,4 +1,4 @@
-package com.rty.rabbit.producer_balance;
+package com.rty.rabbit.producer_balance.mandatory;
 
 import com.rabbitmq.client.*;
 
@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 public class ProducerMandatory {
-    public final static String EXCHANGE_NAME = "balance_logs";
+    public final static String EXCHANGE_NAME = "balance_mandatory_logs";
 
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
         //创建连接,连接RabbitMq
@@ -19,7 +19,19 @@ public class ProducerMandatory {
         //在信道设置交换器
         channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
         //连接关闭时执行 回调
+        connection.addShutdownListener(new ShutdownListener() {
+            @Override
+            public void shutdownCompleted(ShutdownSignalException e) {
+
+            }
+        });
         //信道关闭时执行 回调
+        channel.addShutdownListener(new ShutdownListener() {
+            @Override
+            public void shutdownCompleted(ShutdownSignalException e) {
+
+            }
+        });
         //失败通知 回调
         channel.addReturnListener(new ReturnListener() {
             @Override

@@ -1,4 +1,4 @@
-package com.rty.rabbit.producer_balance;
+package com.rty.rabbit.producer_balance.mandatory;
 
 import com.rabbitmq.client.*;
 
@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.TimeoutException;
 
 public class ConsumerProducerMandatory {
-    public final static String EXCHANGE_NAME = "balance_logs";
+    public final static String EXCHANGE_NAME = "balance_mandatory_logs";
 
     public static void main(String[] args) throws IOException, TimeoutException {
         //创建连接,连接RabbitMq
