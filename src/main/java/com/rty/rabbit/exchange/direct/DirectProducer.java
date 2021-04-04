@@ -1,4 +1,4 @@
-package com.rty.rabbit.exchange;
+package com.rty.rabbit.exchange.direct;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -39,6 +39,7 @@ public class DirectProducer {
                 e.printStackTrace();
             }
         });
+        channel.basicPublish(EXCHANGE_NAME,"king",null,"hello 4".getBytes());
         channel.close();
         connection.close();
 
