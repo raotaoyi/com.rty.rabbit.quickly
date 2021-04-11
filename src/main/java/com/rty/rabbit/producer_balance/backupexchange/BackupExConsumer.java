@@ -1,19 +1,17 @@
-package com.rty.rabbit.producer_balance.confirm;
+package com.rty.rabbit.producer_balance.backupexchange;
 
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLOutput;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 类说明:消费者-发送方确认模式
+ * 类说明:消费者--绑定备用交换器队列的消费者
  */
-public class ProducerConfirmConsumer {
-    public final static String EXCHANGE_NAME = "producer_async_confirm";
-
-    public final static String ROUTE_KEY = "king";
-
+public class BackupExConsumer {
+    public static String BAK_EXCHANGE_NAME = "ae";
     public static void main(String[] args) throws IOException, TimeoutException {
         //创建连接,连接RabbitMq
         ConnectionFactory connectionFactory = new ConnectionFactory();
@@ -22,21 +20,22 @@ public class ProducerConfirmConsumer {
         Connection connection = connectionFactory.newConnection();
         //创建信道
         Channel channel = connection.createChannel();
-        //在信道设置交换器
-        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
-        String queueName = "confirm_queue";
-        channel.queueDeclare(queueName, false, false, false, null);
-        //只关注king
-        channel.queueBind(queueName,EXCHANGE_NAME,ROUTE_KEY);
-        System.out.println("[*] waiting for message......");
+        //备用交换器
+        channel.exchangeDeclare(BAK_EXCHANGE_NAME, BuiltinExchangeType.FANOUT,true,false,null);
+        //声明一个队列
+        String queueName="fetchother";
+        channel.queueDeclare(queueName,false,false,false,null);
+        channel.queueBind(queueName,BAK_EXCHANGE_NAME,"#");
+        System.out.println("[*] waiting for message.......");
+        //创建队列消费者
         final Consumer consumer=new DefaultConsumer(channel) {
             @Override
-            public void handleDelivery(String consumerTag, Envelope envelope,AMQP.BasicProperties var3, byte[] bytes) throws UnsupportedEncodingException {
+            public void handleDelivery(String var1, Envelope envelope,AMQP.BasicProperties var3, byte[] bytes) throws UnsupportedEncodingException {
                 String message=new String(bytes,"utf-8");
                 System.out.println("received["+envelope.getRoutingKey()+"]"+message);
             }
         };
-        //消费者正式开始在指定的队列上消费
+        //自动提交
         channel.basicConsume(queueName,true,consumer);
     }
 }
